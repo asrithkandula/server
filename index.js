@@ -9,7 +9,8 @@ const app = express()
 const {body,validationResult} = require('express-validator')
 const port = 5000
 const jwtSec = "qwertyuiopasdfghjklzxcvbnm"
-const mongoURI = 'mongodb+srv://root:root@merncluster.xo3u5rg.mongodb.net/food-mern-finaldb?retryWrites=true&w=majority'
+// const mongoURI = 'mongodb+srv://root:root@merncluster.xo3u5rg.mongodb.net/food-mern-finaldb?retryWrites=true&w=majority'
+const mongoURI = 'mongodb+srv://root:root@food-delivery-asrith.f7do6.mongodb.net/food-mern-finaldb?retryWrites=true&w=majority&appName=food-delivery-asrith'
 app.use(cors())
 app.use(express.json())
 
@@ -89,33 +90,32 @@ app.post('/foodData',(req,res)=>{
   }
 })
 
-app.post('/createuser',[
+app.post('/createuser', [
   body('email').isEmail(),
-  body('password').isLength({min:5}),
-  body('name').isLength({min:5})
-]
-,async (req,res)=>{
-  const errors = validationResult(req)
-  if(!errors.isEmpty()) return res.status(400).json({errors:errors.array()}) 
-
+  body('password').isLength({ min: 5 }),
+  body('name').isLength({ min: 5 })
+], async (req, res) => {
+  console.log("Received a signup request:", req.body); // Debugging log
   
-  let secPassword = req.body.password
- 
-  try{
-    await User.create({
-      name:req.body.name,
-      password:secPassword,
-      email : req.body.email,
-      location:req.body.location
-    })
-    res.json({sucess:true})
-  }catch(error)
-  {
-    console.log(error)
-    res.json({sucess:false})
-  }
-})
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+  
+  let secPassword = req.body.password;
 
+  try {
+    await User.create({
+      name: req.body.name,
+      password: secPassword,
+      email: req.body.email,
+      location: req.body.location
+    });
+    console.log("User created successfully:", req.body.name); // Debugging log
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error during user creation:", error); // More detailed error log
+    res.json({ success: false, error: error.message });
+  }
+});
 app.post('/loginuser',
 async (req,res)=>{
   console.log(req.body)
@@ -137,12 +137,12 @@ async (req,res)=>{
       }
     }
     const authToken = jwt.sign(data,jwtSec)
-    return res.json({sucess:true,authToken:authToken})
+    return res.json({success:true,authToken:authToken})
   }
   catch(error)
   {
     console.log(error)
-    res.json({sucess:false})
+    res.json({success:false})
   }
 })
 
